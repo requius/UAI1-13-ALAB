@@ -364,6 +364,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	public boolean displayCameraTarget = false;
 	public boolean displayBoundingBox = false;
 	public boolean enableCompositing = false;
+	public boolean drawWireframeBoxes = false;
 
 	int mouse_x, mouse_y, old_mouse_x, old_mouse_y;
 
@@ -762,12 +763,13 @@ public class SimpleModeller implements ActionListener {
 	JButton createBoxButton;
 	JButton deleteSelectionButton;
 	JButton lookAtSelectionButton;
-	JButton resetCameraButton;
+	JButton resetCameraButton;	
 	JCheckBox displayWorldAxesCheckBox;
 	JCheckBox displayCameraTargetCheckBox;
 	JCheckBox displayBoundingBoxCheckBox;
 	JCheckBox enableCompositingCheckBox;
-
+	JCheckBox drawWireframeBoxesCheckBox;
+	
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		if ( source == deleteAllMenuItem ) {
@@ -834,6 +836,10 @@ public class SimpleModeller implements ActionListener {
 		}
 		else if ( source == enableCompositingCheckBox ) {
 			sceneViewer.enableCompositing = ! sceneViewer.enableCompositing;
+			sceneViewer.repaint();
+		}
+		else if ( source == drawWireframeBoxesCheckBox) {
+			sceneViewer.drawWireframeBoxes = ! sceneViewer.drawWireframeBoxes;
 			sceneViewer.repaint();
 		}
 	}
@@ -932,6 +938,11 @@ public class SimpleModeller implements ActionListener {
 		enableCompositingCheckBox.addActionListener(this);
 		toolPanel.add( enableCompositingCheckBox );
 
+		drawWireframeBoxesCheckBox = new JCheckBox("Draw Wireframe Boxes", sceneViewer.drawWireframeBoxes);
+		drawWireframeBoxesCheckBox.setAlignmentX( Component.LEFT_ALIGNMENT );
+		drawWireframeBoxesCheckBox.addActionListener(this);
+		toolPanel.add( drawWireframeBoxesCheckBox );
+		
 		frame.pack();
 		frame.setVisible( true );
 	}
