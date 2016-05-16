@@ -1032,7 +1032,7 @@ public class SimpleModeller implements ActionListener {
 		drawWireframeBoxesCheckBox.addActionListener(this);
 		toolPanel.add( drawWireframeBoxesCheckBox );
 		
-		String defaultValue = "0.0";
+		String defaultValue = "1.0";
 		componentPanel = new JPanel();
 		componentPanel.setBorder(BorderFactory.createTitledBorder("Box's Components"));
 		componentPanel.setSize(100, 100);
