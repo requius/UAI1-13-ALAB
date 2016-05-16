@@ -1,11 +1,12 @@
 
 import java.lang.Math;
+import java.text.NumberFormat;
 import java.util.Vector;
 
 import java.awt.Container;
 import java.awt.Component;
 import java.awt.Dimension;
-
+import java.awt.GridLayout;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
@@ -14,14 +15,18 @@ import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JCheckBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 
 import javax.media.opengl.GL;
@@ -162,6 +167,45 @@ class Scene {
 		}
 	}
 
+	public void setAlphaOfBox( int index, float a ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			cb.a = a;
+		}
+	}
+	
+	public float getRed( int index ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			return cb.r;
+		}
+		return 0;
+	}
+	
+	public float getGreen( int index ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			return cb.g;
+		}
+		return 0;
+	}
+	
+	public float getBlue( int index ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			return cb.b;
+		}
+		return 0;
+	}
+	
+	public float getAlpha( int index ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			return cb.a;
+		}
+		return 0;
+	}
+	
 	public void translateBox( int index, Vector3D translation ) {
 		if ( 0 <= index && index < coloredBoxes.size() ) {
 			ColoredBox cb = coloredBoxes.elementAt(index);
@@ -294,7 +338,8 @@ class Scene {
 	public void drawScene(
 		GL gl,
 		int indexOfHilitedBox, // -1 for none
-		boolean useAlphaBlending
+		boolean useAlphaBlending,
+		boolean drawWireframeBoxes
 	) {
 		if ( useAlphaBlending ) {
 			gl.glDisable(GL.GL_DEPTH_TEST);
@@ -308,7 +353,11 @@ class Scene {
 				gl.glColor4f( cb.r, cb.g, cb.b, cb.a );
 			else
 				gl.glColor3f( cb.r, cb.g, cb.b );
-			drawBox( gl, cb.box, false, false, false );
+			if (drawWireframeBoxes) {
+				drawBox( gl, cb.box, false, true, false );
+			} else {
+				drawBox( gl, cb.box, false, false, false );
+			}
 		}
 		if ( useAlphaBlending ) {
 			gl.glDisable( GL.GL_BLEND );
@@ -455,6 +504,19 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		}
 	}
 
+	public void setAlphaOfSelection( float a ) {
+		if ( indexOfSelectedBox >= 0 ) {
+			scene.setAlphaOfBox( indexOfSelectedBox, a );
+		}
+	}
+	
+	public void changeComponentValue( float r, float g, float b, float a ) {
+		if ( indexOfSelectedBox >= 0  ) {
+			scene.setColorOfBox(indexOfSelectedBox, r, g, b);
+			scene.setAlphaOfBox(indexOfSelectedBox, a);
+		}
+	}
+	
 	public void deleteSelection() {
 		if ( indexOfSelectedBox >= 0 ) {
 			scene.deleteBox( indexOfSelectedBox );
@@ -523,7 +585,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		gl.glDisable( GL.GL_LIGHTING );
 		gl.glShadeModel( GL.GL_FLAT );
 
-		scene.drawScene( gl, indexOfHilitedBox, enableCompositing );
+		scene.drawScene( gl, indexOfHilitedBox, enableCompositing, drawWireframeBoxes);
 
 		if ( displayWorldAxes ) {
 			gl.glBegin( GL.GL_LINES );
@@ -605,6 +667,10 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 			normalAtSelectedPoint.copy( normalAtHilitedPoint );
 			if ( indexOfSelectedBox >= 0 ) {
 				scene.setSelectionStateOfBox( indexOfSelectedBox, true );
+				System.out.println("R:"+scene.getRed(indexOfSelectedBox));
+				System.out.println("G:"+scene.getGreen(indexOfSelectedBox));
+				System.out.println("B:"+scene.getBlue(indexOfSelectedBox));
+				System.out.println("A:"+scene.getAlpha(indexOfSelectedBox));
 			}
 			repaint();
 		}
@@ -757,6 +823,9 @@ public class SimpleModeller implements ActionListener {
 
 	JFrame frame;
 	Container toolPanel;
+	JPanel componentPanel;
+	JPanel labelPanel;
+	JPanel valuePanel;
 	SceneViewer sceneViewer;
 
 	JMenuItem deleteAllMenuItem, quitMenuItem, aboutMenuItem;
@@ -764,11 +833,22 @@ public class SimpleModeller implements ActionListener {
 	JButton deleteSelectionButton;
 	JButton lookAtSelectionButton;
 	JButton resetCameraButton;	
+	JButton changeValueButton;
 	JCheckBox displayWorldAxesCheckBox;
 	JCheckBox displayCameraTargetCheckBox;
 	JCheckBox displayBoundingBoxCheckBox;
 	JCheckBox enableCompositingCheckBox;
 	JCheckBox drawWireframeBoxesCheckBox;
+	
+	JLabel redLabel;
+	JLabel greenLabel;
+	JLabel blueLabel;
+	JLabel alphaLabel;
+	
+	JTextField redTextField;
+	JTextField greenTextField;
+	JTextField blueTextField;
+	JTextField alphaTextField;
 	
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
@@ -840,6 +920,15 @@ public class SimpleModeller implements ActionListener {
 		}
 		else if ( source == drawWireframeBoxesCheckBox) {
 			sceneViewer.drawWireframeBoxes = ! sceneViewer.drawWireframeBoxes;
+			sceneViewer.repaint();
+		}
+		else if ( source == changeValueButton){
+			float red, green, blue, alpha;
+			red = Float.parseFloat(redTextField.getText());
+			green = Float.parseFloat(greenTextField.getText());
+			blue = Float.parseFloat(blueTextField.getText());
+			alpha = Float.parseFloat(alphaTextField.getText());
+			sceneViewer.changeComponentValue(red, green, blue, alpha);
 			sceneViewer.repaint();
 		}
 	}
@@ -942,6 +1031,40 @@ public class SimpleModeller implements ActionListener {
 		drawWireframeBoxesCheckBox.setAlignmentX( Component.LEFT_ALIGNMENT );
 		drawWireframeBoxesCheckBox.addActionListener(this);
 		toolPanel.add( drawWireframeBoxesCheckBox );
+		
+		String defaultValue = "0.0";
+		componentPanel = new JPanel();
+		componentPanel.setBorder(BorderFactory.createTitledBorder("Box's Components"));
+		componentPanel.setSize(100, 100);
+		componentPanel.setLayout(new GridLayout(0, 2));
+		componentPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		
+		labelPanel = new JPanel();
+		labelPanel.setLayout(new GridLayout(0, 1));
+		labelPanel.add(redLabel = new JLabel("Red (0-1)"));
+		labelPanel.add(greenLabel = new JLabel("Green (0-1)"));
+		labelPanel.add(blueLabel = new JLabel("Blue (0-1)"));
+		labelPanel.add(alphaLabel = new JLabel("Alpha (0-1)"));
+		
+		valuePanel = new JPanel();
+		valuePanel.setLayout(new GridLayout(0, 1));
+		valuePanel.add(redTextField = new JTextField());
+		redTextField.setText(defaultValue);
+		valuePanel.add(greenTextField = new JTextField());
+		greenTextField.setText(defaultValue);
+		valuePanel.add(blueTextField = new JTextField());
+		blueTextField.setText(defaultValue);
+		valuePanel.add(alphaTextField = new JTextField());
+		alphaTextField.setText(defaultValue);
+		
+		componentPanel.add(labelPanel);
+		componentPanel.add(valuePanel);
+		toolPanel.add(componentPanel);		
+		
+		changeValueButton = new JButton("Change Components Value");
+		changeValueButton.setAlignmentX( Component.LEFT_ALIGNMENT );
+		changeValueButton.addActionListener(this);
+		toolPanel.add(changeValueButton);
 		
 		frame.pack();
 		frame.setVisible( true );

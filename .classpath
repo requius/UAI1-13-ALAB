@@ -2,10 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="C:/Users/aj89610/Desktop/SimpleModeller/jogl-1.1.1-windows-amd64/lib/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="C:/Users/aj89610/Desktop/SimpleModeller/jogl-1.1.1-windows-amd64/lib/jogl.jar"/>
-	<classpathentry kind="lib" path="jogl-1.1.1-windows-amd64/lib/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="jogl-1.1.1-windows-amd64/lib/jogl.jar">
+	<classpathentry exported="true" kind="lib" path="jogl-1.1.1-windows-amd64/lib/gluegen-rt.jar"/>
+	<classpathentry exported="true" kind="lib" path="jogl-1.1.1-windows-amd64/lib/jogl.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SimpleModeller/jogl-1.1.1-windows-amd64/lib"/>
 		</attributes>
