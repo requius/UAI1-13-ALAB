@@ -519,7 +519,11 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	
 	public void deleteSelection() {
 		if ( indexOfSelectedBox >= 0 ) {
-			scene.deleteBox( indexOfSelectedBox );
+			for ( int i = 0; i < scene.coloredBoxes.size(); ++i ) {
+				if ( scene.coloredBoxes.elementAt(i).isSelected )
+					scene.deleteBox( i );
+			}
+			//scene.deleteBox( indexOfSelectedBox );
 			indexOfSelectedBox = -1;
 			indexOfHilitedBox = -1;
 		}
@@ -667,21 +671,32 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 
 		updateHiliting();
 
-		if ( SwingUtilities.isLeftMouseButton(e) && !e.isControlDown() ) {
-			if ( indexOfSelectedBox >= 0 )
-				// de-select the old box
-				scene.setSelectionStateOfBox( indexOfSelectedBox, false );
+		if ( SwingUtilities.isLeftMouseButton(e) && !e.isControlDown() && !e.isShiftDown()) {
+			//if ( indexOfSelectedBox >= 0 ) {
+				//for ( int i = 0; i < scene.coloredBoxes.size(); ++i ) 
+					// de-select the old box				
+				//	scene.setSelectionStateOfBox( i, false );
+				
+			//}
 			indexOfSelectedBox = indexOfHilitedBox;
 			selectedPoint.copy( hilitedPoint );
 			normalAtSelectedPoint.copy( normalAtHilitedPoint );
 			if ( indexOfSelectedBox >= 0 ) {
-				scene.setSelectionStateOfBox( indexOfSelectedBox, true );
+				scene.toggleSelectionStateOfBox( indexOfSelectedBox );
 				System.out.println("R:"+scene.getRed(indexOfSelectedBox));
 				System.out.println("G:"+scene.getGreen(indexOfSelectedBox));
 				System.out.println("B:"+scene.getBlue(indexOfSelectedBox));
 				System.out.println("A:"+scene.getAlpha(indexOfSelectedBox));
 			}
 			repaint();
+		} else if ( SwingUtilities.isLeftMouseButton(e) && e.isShiftDown() ) {
+			indexOfSelectedBox = indexOfHilitedBox;
+			//selectedPoint.copy( hilitedPoint );
+			normalAtSelectedPoint.copy( normalAtHilitedPoint );
+			if ( indexOfSelectedBox >= 0 ) {
+				scene.toggleSelectionStateOfBox( indexOfSelectedBox );
+			}
+			
 		}
 	}
 
@@ -792,7 +807,11 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 					&& plane.intersects( ray2, intersection2, true )
 				) {
 					Vector3D translation = Point3D.diff( intersection2, intersection1 );
-					scene.translateBox( indexOfSelectedBox, translation );
+					for ( int i = 0; i < scene.coloredBoxes.size(); ++i ) {
+						if (scene.coloredBoxes.elementAt(i).isSelected)
+							scene.translateBox( i, translation );
+					}
+					//scene.translateBox( indexOfSelectedBox, translation );
 					repaint();
 				}
 			}
