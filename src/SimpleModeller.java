@@ -415,6 +415,8 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	public boolean enableCompositing = false;
 	public boolean drawWireframeBoxes = false;
 
+	private boolean BoxSelected = false;
+	
 	int mouse_x, mouse_y, old_mouse_x, old_mouse_y;
 
 	public SceneViewer( GLCapabilities caps ) {
@@ -649,11 +651,20 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		mouse_y = e.getY();
 
 		if ( radialMenu.isVisible() || (SwingUtilities.isRightMouseButton(e) && !e.isShiftDown() && !e.isControlDown()) ) {
-			int returnValue = radialMenu.pressEvent( mouse_x, mouse_y );
-			if ( returnValue == CustomWidget.S_REDRAW )
-				repaint();
-			if ( returnValue != CustomWidget.S_EVENT_NOT_CONSUMED )
-				return;
+			if ( indexOfSelectedBox >= 0 )
+				scene.setSelectionStateOfBox( indexOfSelectedBox, false );
+			indexOfSelectedBox = indexOfHilitedBox;
+			selectedPoint.copy( hilitedPoint );
+			normalAtSelectedPoint.copy( normalAtHilitedPoint );
+			if ( indexOfSelectedBox >= 0 ) {
+				scene.setSelectionStateOfBox( indexOfSelectedBox, true );
+				int returnValue = radialMenu.pressEvent( mouse_x, mouse_y );
+				if ( returnValue == CustomWidget.S_REDRAW )
+					repaint();
+				if ( returnValue != CustomWidget.S_EVENT_NOT_CONSUMED )
+					return;	
+			}
+			
 		}
 
 		updateHiliting();
@@ -931,6 +942,7 @@ public class SimpleModeller implements ActionListener {
 			sceneViewer.changeComponentValue(red, green, blue, alpha);
 			sceneViewer.repaint();
 		}
+
 	}
 
 
@@ -1032,7 +1044,7 @@ public class SimpleModeller implements ActionListener {
 		drawWireframeBoxesCheckBox.addActionListener(this);
 		toolPanel.add( drawWireframeBoxesCheckBox );
 		
-		String defaultValue = "0.0";
+		String defaultValue = "1.0";
 		componentPanel = new JPanel();
 		componentPanel.setBorder(BorderFactory.createTitledBorder("Box's Components"));
 		componentPanel.setSize(100, 100);
